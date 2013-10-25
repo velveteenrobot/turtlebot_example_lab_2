@@ -1,0 +1,36 @@
+#pragma once
+
+#include "Map.h"
+#include <geometry_msgs/Pose.h>
+
+#include <list>
+
+using namespace std;
+using namespace geometry_msgs;
+
+class Milestone {
+ public:
+  Milestone(
+      Milestone* prev,
+      Pose& endPose,
+      float speed,
+      float turnRate,
+      int numCycles);
+
+  Pose& getEndPose() { return mEndPosition; }
+  Milestone* getPrev() { return mPrevMilestone; }
+  float getSpeed() { return mSpeed; }
+  float getTurnRate() { return mTurnRate; }
+  int getNumCycles() { return mNumCycles; }
+
+  void draw(int color);
+  float distTo(Pose position);
+
+ private:
+  Milestone* mPrevMilestone;
+  Pose mEndPosition;
+  float mSpeed, mTurnRate;
+  int mNumCycles;
+};
+
+list<Milestone*> doRRT(Pose start, Pose end, Map& map);
