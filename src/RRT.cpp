@@ -1,8 +1,9 @@
 #include "RRT.h"
+
 #include "turtlebot_example.h"
+#include "marker.h"
 
-#include "tf/transform_datatypes.h"
-
+#include <tf/transform_datatypes.h>
 #include <set>
 
 #define RRT_COLOR 1
@@ -144,4 +145,21 @@ list<Milestone*> doRRT(Pose start, Pose end, Map& map) {
   }
 
   return result;
+}
+
+float Milestone::distTo(Pose position) {
+  float xDist = position.position.x - mEndPosition.position.x;
+  float yDist = position.position.y - mEndPosition.position.y;
+  return sqrt(xDist*xDist + yDist*yDist);
+}
+
+void Milestone::draw(int color) {
+  Pose lastPose = mPrevMilestone->getEndPose();
+  Pose nextPose = lastPose;
+  bool failed = false;
+  for (int cycle = 0; cycle < mNumCycles; ++cycle) {
+    lastPose = nextPose;
+    nextPose = propogateDynamics(nextPose, mSpeed, mTurnRate);
+    drawLine(color, lastPose, nextPose);
+  }
 }

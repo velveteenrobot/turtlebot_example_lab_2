@@ -19,7 +19,7 @@ class Map {
  private:
   unsigned int mWidth, mHeight;
   float mResolution;
-  vector<vector<bool>* > mMap;
+  vector<vector<bool>*> mMap;
   Pose mPose;
 
   bool isCellIndexOccupied(unsigned int xGrid, unsigned int yGrid);

@@ -8,7 +8,8 @@ Map::Map(const nav_msgs::OccupancyGrid& msg) {
   mHeight = msg.info.height;
   mResolution = msg.info.resolution;
 
-  vector<signed char, allocator<signed char> >::const_iterator iter = msg.data.begin();
+  vector<signed char, allocator<signed char> >::const_iterator iter =
+      msg.data.begin();
 
   // copy over the map data
   for (int y = 0; y < mHeight; ++y) {
@@ -55,3 +56,21 @@ void Map::drawPositions() {
   }
 }
 
+#define ROBOT_RADIUS 0.25
+
+bool Map::robotAreaOccupied(Pose robotPose) {
+  int gridX = (robotPose.position.x - mPose.position.x) / mResolution;
+  int gridY = (robotPose.position.y - mPose.position.y) / mResolution;
+  int gridDistance = ROBOT_RADIUS / mResolution;
+
+  for (int x = gridX - gridDistance; x <= gridX + gridDistance; x++) {
+    for (int y = gridY - gridDistance; y <= gridY + gridDistance; y++) {
+      if (x < 0 || x >= mWidth ||
+          y < 0 || y >= mHeight ||
+          (*mMap[y])[x]) {
+        return false;
+      }
+    }
+  }
+  return true;
+}

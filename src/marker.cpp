@@ -11,9 +11,9 @@ void markerInit(ros::NodeHandle& n) {
       true);
 }
 
-void drawPoint(float x, float y) {
-  static int lastId = 1;
+static int lastId = 1;
 
+void drawPoint(float x, float y) {
   visualization_msgs::Marker lines;
   lines.header.frame_id = "/map";
   lines.id = lastId; //each curve must have a unique id or you will overwrite an old ones
@@ -40,40 +40,26 @@ void drawPoint(float x, float y) {
   marker_pub.publish(lines);
 }
 
-//Example of drawing a curve
-void drawCurve(int k) {
-  // Curves are drawn as a series of stright lines
-  // Simply sample your curves into a series of points
-
+void drawLine(int color, Pose start, Pose end) {
   double x = 0;
   double y = 0;
   double steps = 50;
 
   visualization_msgs::Marker lines;
   lines.header.frame_id = "/map";
-  lines.id = k; //each curve must have a unique id or you will overwrite an old ones
+  lines.id = lastId;
+  lastId++;
   lines.type = visualization_msgs::Marker::LINE_STRIP;
   lines.action = visualization_msgs::Marker::ADD;
   lines.ns = "curves";
   lines.scale.x = 0.1;
   lines.color.r = 1.0;
-  lines.color.b = 0.2*k;
+  lines.color.b = 0.3*color;
   lines.color.a = 1.0;
 
-  //generate curve points
-  for(int i = 0; i < steps; i++) {
-    geometry_msgs::Point p;
-    p.x = x;
-    p.y = y;
-    p.z = 0; //not used
-    lines.points.push_back(p);
-
-    //curve model
-    x = x+0.1;
-    y = sin(0.1*i*k);
-  }
+  lines.points.push_back(start.position);
+  lines.points.push_back(end.position);
 
   //publish new curve
   marker_pub.publish(lines);
-
 }
