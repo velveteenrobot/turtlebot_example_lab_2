@@ -39,23 +39,6 @@ bool Map::isCellIndexOccupied(unsigned int xGrid, unsigned int yGrid) {
   return (*mMap[yGrid])[xGrid];
 }
 
-void Map::drawPositions() {
-  // copy over the map data
-  for (int y = 0; y < mHeight; ++y) {
-    mMap.push_back(new vector<bool>());
-    for (int x = 0; x < mWidth; ++x) {
-      if (isCellIndexOccupied(x, y)) {
-        cout<<"occupied!"<<endl;
-        drawPoint(
-            (x * mResolution) + mPose.position.x,
-            (y * mResolution) + mPose.position.y);
-      } else {
-        cout<<"NOT occupied!"<<endl;
-      }
-    }
-  }
-}
-
 #define ROBOT_RADIUS 0.25
 
 bool Map::robotAreaOccupied(Pose robotPose) {
@@ -67,10 +50,10 @@ bool Map::robotAreaOccupied(Pose robotPose) {
     for (int y = gridY - gridDistance; y <= gridY + gridDistance; y++) {
       if (x < 0 || x >= mWidth ||
           y < 0 || y >= mHeight ||
-          (*mMap[y])[x]) {
-        return false;
+          isCellIndexOccupied(x, y)) {
+        return true;
       }
     }
   }
-  return true;
+  return false;
 }

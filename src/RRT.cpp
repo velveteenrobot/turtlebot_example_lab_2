@@ -7,7 +7,7 @@
 #include <set>
 
 #define RRT_COLOR 1
-#define SELECTED_PATH_COLOR 2
+#define SELECTED_PATH_COLOR 0
 
 /**
  * Propogates the dynamics for 1 step
@@ -20,8 +20,8 @@ static Pose propogateDynamics(Pose start, float speed, float turnRate) {
   quaternionMsgToTF(start.orientation, bt_q);
   tf::Matrix3x3(bt_q).getRPY(roll, pitch, yaw);
 
-  result.position.x += CYCLE_TIME * speed * sin(yaw);
-  result.position.y += CYCLE_TIME * speed * cos(yaw);
+  result.position.x += CYCLE_TIME * speed * cos(yaw);
+  result.position.y += CYCLE_TIME * speed * sin(yaw);
   yaw += CYCLE_TIME * turnRate;
 
   quaternionTFToMsg(
@@ -66,8 +66,8 @@ static Milestone* selectRandomMilestone(vector<Milestone*>& milestones) {
 static Milestone* makeRandomMilestone(Milestone* source, Map& map) {
   for (;;) {
     // TODO: normal distribution?
-    float speed = randFloat(0, 1.0);
-    float turnRate = randFloat(-0.5, 0.5);
+    float speed = randFloat(-0.05, 0.3);
+    float turnRate = randFloat(-1, 1);
     int numCycles = (rand() % 70) + 30;
 
     Pose endPose = source->getEndPose();
@@ -116,7 +116,6 @@ list<Milestone*> doRRT(Pose start, Pose end, Map& map) {
   for (;;) {
     // select a milestone
     Milestone* source = selectRandomMilestone(milestones);
-
     // select random motion inputs
     Milestone* newMilestone = makeRandomMilestone(source, map);
 
@@ -131,7 +130,9 @@ list<Milestone*> doRRT(Pose start, Pose end, Map& map) {
 
   list<Milestone*> result;
   set<Milestone*> dontDelete;
-  for (Milestone *cur = finalMilestone; cur != NULL; cur = cur->getPrev()) {
+  for (Milestone *cur = finalMilestone;
+       cur->getPrev() != NULL;
+       cur = cur->getPrev()) {
     result.push_front(cur);
     dontDelete.insert(cur);
     cur->draw(SELECTED_PATH_COLOR);
@@ -154,12 +155,13 @@ float Milestone::distTo(Pose position) {
 }
 
 void Milestone::draw(int color) {
-  Pose lastPose = mPrevMilestone->getEndPose();
-  Pose nextPose = lastPose;
+  Pose nextPose = mPrevMilestone->getEndPose();
   bool failed = false;
+  vector<Point> points;
+  points.push_back(nextPose.position);
   for (int cycle = 0; cycle < mNumCycles; ++cycle) {
-    lastPose = nextPose;
     nextPose = propogateDynamics(nextPose, mSpeed, mTurnRate);
-    drawLine(color, lastPose, nextPose);
+    points.push_back(nextPose.position);
   }
+  drawLine(color, points);
 }

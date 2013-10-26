@@ -12,6 +12,7 @@
 #include "turtlebot_example.h"
 #include "Map.h"
 #include "marker.h"
+#include "RRT.h"
 
 #include <ros/ros.h>
 #include <geometry_msgs/PoseStamped.h>
@@ -28,6 +29,9 @@ using namespace std;
 
 //Callback function for the Position topic (LIVE)
 
+static Map* roomMap = NULL;
+static Pose* pose = NULL;
+
 void pose_callback(const turtlebot_example::ips_msg& msg)
 {
   //This function is called when a new position message is received
@@ -35,9 +39,18 @@ void pose_callback(const turtlebot_example::ips_msg& msg)
     return;
   }
 
-  double X = msg.X; // Robot X psotition
-  double Y = msg.Y; // Robot Y psotition
-  double Yaw = msg.Yaw; // Robot Yaw
+  if (pose != NULL) {
+    return;
+  }
+
+  pose = new Pose();
+
+  pose->position.x = msg.X;
+  pose->position.y = msg.Y;
+
+  quaternionTFToMsg(
+      tf::createQuaternionFromRPY(0, 0, msg.Yaw),
+      pose->orientation);
 
   // std::cout << "X: " << X << ", Y: " << Y << ", Yaw: " << Yaw << std::endl ;
 }
@@ -49,8 +62,7 @@ void map_callback(const nav_msgs::OccupancyGrid& msg)
   //This function is called when a new map is received
   //you probably want to save the map into a form which is easy to work with
 
-  Map map(msg);
-  map.drawPositions();
+  roomMap = new Map(msg);
   // TODO: calculate the path
 }
 
@@ -80,6 +92,15 @@ int main(int argc, char **argv)
   {
     loop_rate.sleep(); //Maintain the loop rate
     ros::spinOnce();   //Check for new messages
+
+    if (pose != NULL && roomMap != NULL) {
+      cout<<"Running RRT"<<endl;
+      Pose dest;
+      dest.position.x = 6;
+      dest.position.y = 3;
+      doRRT(*pose, dest, *roomMap);
+      roomMap = NULL;
+    }
 
     //Main loop code goes here:
     // vel.linear.x = 0.1; // set linear speed

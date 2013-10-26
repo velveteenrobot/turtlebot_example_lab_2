@@ -12,8 +12,6 @@ class Map {
   Map(const nav_msgs::OccupancyGrid& msg);
   bool isOccupied(float x, float y);
 
-  void drawPositions();
-
   bool robotAreaOccupied(Pose robotPose);
 
  private:
