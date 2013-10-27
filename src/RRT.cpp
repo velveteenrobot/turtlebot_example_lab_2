@@ -12,7 +12,7 @@
 /**
  * Propogates the dynamics for 1 step
  */
-static Pose propogateDynamics(Pose start, float speed, float turnRate) {
+Pose propogateDynamics(Pose start, float speed, float turnRate) {
   Pose result = start;
   double roll, pitch, yaw;
 
@@ -63,10 +63,13 @@ static Milestone* selectRandomMilestone(vector<Milestone*>& milestones) {
   return milestones.back();
 }
 
+static const int MAX_BRANCH_CREATION_ATTEMPS = 20;
+
 static Milestone* makeRandomMilestone(Milestone* source, Map& map) {
-  for (;;) {
+  for (int i = 0; i < MAX_BRANCH_CREATION_ATTEMPS; ++i) {
     // TODO: normal distribution?
-    float speed = randFloat(-0.05, 0.3);
+    // float speed = randFloat(-0.05, 0.3);
+    float speed = randFloat(0.1, 0.3);
     float turnRate = randFloat(-1, 1);
     int numCycles = (rand() % 70) + 30;
 
@@ -86,6 +89,7 @@ static Milestone* makeRandomMilestone(Milestone* source, Map& map) {
     }
     return new Milestone(source, endPose, speed, turnRate, numCycles);
   }
+  return NULL;
 }
 
 static void insertMilestoneSorted(
@@ -118,6 +122,10 @@ list<Milestone*> doRRT(Pose start, Pose end, Map& map) {
     Milestone* source = selectRandomMilestone(milestones);
     // select random motion inputs
     Milestone* newMilestone = makeRandomMilestone(source, map);
+    if (newMilestone == NULL) {
+      // that milestone didn't have any valid paths, try again
+      continue;
+    }
 
     if (newMilestone->distTo(end) < TARGET_ERROR) {
       finalMilestone = newMilestone;

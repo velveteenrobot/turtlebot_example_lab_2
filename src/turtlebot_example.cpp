@@ -13,6 +13,7 @@
 #include "Map.h"
 #include "marker.h"
 #include "RRT.h"
+#include "tracking.h"
 
 #include <ros/ros.h>
 #include <geometry_msgs/PoseStamped.h>
@@ -30,7 +31,9 @@ using namespace std;
 //Callback function for the Position topic (LIVE)
 
 static Map* roomMap = NULL;
-static Pose* pose = NULL;
+static bool poseReady = false;
+static Pose pose;
+
 
 void pose_callback(const turtlebot_example::ips_msg& msg)
 {
@@ -39,20 +42,13 @@ void pose_callback(const turtlebot_example::ips_msg& msg)
     return;
   }
 
-  if (pose != NULL) {
-    return;
-  }
-
-  pose = new Pose();
-
-  pose->position.x = msg.X;
-  pose->position.y = msg.Y;
+  pose.position.x = msg.X;
+  pose.position.y = msg.Y;
 
   quaternionTFToMsg(
       tf::createQuaternionFromRPY(0, 0, msg.Yaw),
-      pose->orientation);
-
-  // std::cout << "X: " << X << ", Y: " << Y << ", Yaw: " << Yaw << std::endl ;
+      pose.orientation);
+  poseReady = true;
 }
 
 
@@ -66,6 +62,11 @@ void map_callback(const nav_msgs::OccupancyGrid& msg)
   // TODO: calculate the path
 }
 
+void spinOnce(ros::Rate& loopRate) {
+  loopRate.sleep(); //Maintain the loop rate
+  ros::spinOnce();   //Check for new messages
+}
+
 int main(int argc, char **argv)
 {
   //Initialize the ROS framework
@@ -77,37 +78,40 @@ int main(int argc, char **argv)
   ros::Subscriber pose_sub = n.subscribe("/indoor_pos", 1, pose_callback);
 
   //Setup topics to Publish from this node
-  ros::Publisher velocity_publisher = n.advertise<geometry_msgs::Twist>(
-      "/cmd_vel_mux/input/navi",
-      1);
   markerInit(n);
 
-  //Velocity control variable
-  geometry_msgs::Twist vel;
-
   //Set the loop rate
-  ros::Rate loop_rate(1/CYCLE_TIME);    //20Hz update rate
+  ros::Rate loopRate(1/CYCLE_TIME);    //20Hz update rate
 
-  while (ros::ok())
-  {
-    loop_rate.sleep(); //Maintain the loop rate
-    ros::spinOnce();   //Check for new messages
-
-    if (pose != NULL && roomMap != NULL) {
-      cout<<"Running RRT"<<endl;
-      Pose dest;
-      dest.position.x = 6;
-      dest.position.y = 3;
-      doRRT(*pose, dest, *roomMap);
-      roomMap = NULL;
-    }
-
-    //Main loop code goes here:
-    // vel.linear.x = 0.1; // set linear speed
-    // vel.angular.z = 0.3; // set angular speed
-
-    velocity_publisher.publish(vel); // Publish the command velocity
+  // wait for the position
+  while (!poseReady) {
+    spinOnce(loopRate);
+  }
+  // wiat for the map
+  while (roomMap == NULL) {
+    spinOnce(loopRate);
   }
 
+  // plan a path
+  cout<<"Running RRT"<<endl;
+  Pose dest;
+  dest.position.x = 6;
+  dest.position.y = 3;
+  list<Milestone*> path = doRRT(pose, dest, *roomMap);
+  /*
+  list<Milestone*> path;
+  Pose unusedPose;
+  path.push_back(new Milestone(NULL, unusedPose, 0.2, 0, 100));
+  */
+  // track the path
+  Tracking tracking(path, pose, n);
+  while (ros::ok()) {
+    //Velocity control variable
+    if (!tracking.doCycle(pose)) {
+      break;
+    }
+    spinOnce(loopRate);
+  }
+  // TODO: free memory
   return 0;
 }

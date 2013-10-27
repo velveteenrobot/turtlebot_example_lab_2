@@ -34,3 +34,4 @@ class Milestone {
 };
 
 list<Milestone*> doRRT(Pose start, Pose end, Map& map);
+Pose propogateDynamics(Pose start, float speed, float turnRate);
