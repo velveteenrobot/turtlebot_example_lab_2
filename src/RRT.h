@@ -33,5 +33,6 @@ class Milestone {
   int mNumCycles;
 };
 
+list<Milestone*> doRRTWaypoints(Pose start, vector<Pose>& waypoints, Map& map);
 list<Milestone*> doRRT(Pose start, Pose end, Map& map);
 Pose propogateDynamics(Pose start, float speed, float turnRate);

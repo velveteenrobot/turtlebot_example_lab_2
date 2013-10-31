@@ -94,10 +94,16 @@ int main(int argc, char **argv)
 
   // plan a path
   cout<<"Running RRT"<<endl;
+  vector<Pose> waypoints;
   Pose dest;
   dest.position.x = 6;
   dest.position.y = 3;
-  list<Milestone*> path = doRRT(pose, dest, *roomMap);
+  waypoints.push_back(dest);
+  dest.position.x = 6;
+  dest.position.y = -3;
+  waypoints.push_back(dest);
+
+  list<Milestone*> path = doRRTWaypoints(pose, waypoints, *roomMap);
   /*
   list<Milestone*> path;
   Pose unusedPose;

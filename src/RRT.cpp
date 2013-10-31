@@ -156,6 +156,17 @@ list<Milestone*> doRRT(Pose start, Pose end, Map& map) {
   return result;
 }
 
+list<Milestone*> doRRTWaypoints(Pose start, vector<Pose>& waypoints, Map& map) {
+  list<Milestone*> result;
+  Pose* prevEndPose = &start;
+  for (int i = 0; i < waypoints.size(); ++i) {
+    list<Milestone*> curSection = doRRT(*prevEndPose, waypoints[i], map);
+    result.insert(result.end(), curSection.begin(), curSection.end());
+    prevEndPose = &(*result.rbegin())->getEndPose();
+  }
+  return result;
+}
+
 float Milestone::distTo(Pose position) {
   float xDist = position.position.x - mEndPosition.position.x;
   float yDist = position.position.y - mEndPosition.position.y;
