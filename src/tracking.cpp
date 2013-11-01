@@ -30,6 +30,7 @@ bool Tracking::doCycle(Pose& curPose) {
   mCurCycle++;
   if (mCurCycle > (*mCurMilestone)->getNumCycles()) {
     mCurCycle = 0;
+    mExpectedPose = (*mCurMilestone)->getEndPose();
     mCurMilestone++;
     if (mCurMilestone == mMilestones.end()) {
       return false;

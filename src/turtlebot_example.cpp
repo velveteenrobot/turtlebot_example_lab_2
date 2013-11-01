@@ -99,7 +99,7 @@ int main(int argc, char **argv)
   dest.position.x = 0;
   dest.position.y = 0;
   waypoints.push_back(dest);
-  dest.position.x = 6;
+  dest.position.x = 5;
   dest.position.y = 3;
   waypoints.push_back(dest);
   dest.position.x = 6;
