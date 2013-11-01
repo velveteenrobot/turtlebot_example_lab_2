@@ -72,7 +72,7 @@ Milestone* Milestone::makeRandomMilestone(Map& map) {
   for (int i = 0; i < MAX_BRANCH_CREATION_ATTEMPS; ++i) {
     // TODO: normal distribution?
     // float speed = randFloat(-0.05, 0.3);
-    float speed = randFloat(0.0, 0.3);
+    float speed = randFloat(0.1, 0.3);
     float turnRateRange = 1.0 - speed * 3;
     float turnRate = randFloat(-turnRateRange, turnRateRange);
     int numCycles = (rand() % 70) + 30;
