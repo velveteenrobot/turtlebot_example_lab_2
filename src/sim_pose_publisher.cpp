@@ -29,7 +29,7 @@ void pose_callback(const gazebo_msgs::ModelStates& msg)
 	//This function is called when a new position message is received
 	turtlebot_example::ips_msg curpose;
 	curpose.header.stamp = ros::Time::now();
-	curpose.tag_id = 0;
+	curpose.tag_id = 5;
 	curpose.hamming_distance = 0;
 	curpose.header.frame_id="/map";
 	curpose.X = msg.pose[1].position.x;

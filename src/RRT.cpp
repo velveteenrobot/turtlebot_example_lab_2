@@ -63,15 +63,15 @@ static vector<Milestone*>::iterator selectRandomMilestone(
   return --milestones.end();
 }
 
-static const int MAX_BRANCH_CREATION_ATTEMPS = 20;
+static const int MAX_BRANCH_CREATION_ATTEMPS = 30;
 
 Milestone* Milestone::makeRandomMilestone(Map& map) {
   for (int i = 0; i < MAX_BRANCH_CREATION_ATTEMPS; ++i) {
     // TODO: normal distribution?
-    // float speed = randFloat(-0.05, 0.3);
+    float speed = randFloat(-0.05, 0.3);
     // float speed = randFloat(0.1, 0.3);
-    float speed = 0.15;
-    float turnRateRange = 0.7;
+    // float speed = randFloat(-0.2, 0.2);
+    float turnRateRange = 1.0;
     float turnRate = randFloat(-turnRateRange, turnRateRange);
     int numCycles = (rand() % 70) + 30;
 

@@ -39,7 +39,7 @@ bool Map::isCellIndexOccupied(unsigned int xGrid, unsigned int yGrid) {
   return (*mMap[yGrid])[xGrid];
 }
 
-#define ROBOT_RADIUS 0.31
+#define ROBOT_RADIUS 0.21
 
 bool Map::robotAreaOccupied(Pose robotPose) {
   int gridX = (robotPose.position.x - mPose.position.x) / mResolution;

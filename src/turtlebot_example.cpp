@@ -83,28 +83,32 @@ int main(int argc, char **argv)
   //Set the loop rate
   ros::Rate loopRate(1/CYCLE_TIME);    //20Hz update rate
 
-  // wait for the position
+  cout<<"wait for the position"<<endl;
   while (!poseReady) {
     spinOnce(loopRate);
   }
-  // wiat for the map
+  cout<<"wait for the map"<<endl;
   while (roomMap == NULL) {
     spinOnce(loopRate);
   }
+  cout<<"Map width: "<<roomMap->getWidth()<<endl;
 
   // plan a path
   cout<<"Running RRT"<<endl;
   vector<Pose> waypoints;
   Pose dest;
-  dest.position.x = 0;
-  dest.position.y = 0;
+  dest.position.x = -1.5;
+  dest.position.y = 0.2;
   waypoints.push_back(dest);
-  dest.position.x = 5;
-  dest.position.y = 3;
+
+  dest.position.x = -0.2;
+  dest.position.y = 4.0;
   waypoints.push_back(dest);
-  dest.position.x = 6;
-  dest.position.y = -3;
+
+  dest.position.x = 2.5;
+  dest.position.y = 2.5;
   waypoints.push_back(dest);
+
 
   list<Milestone*> path = doRRTWaypoints(pose, waypoints, *roomMap);
   /*
