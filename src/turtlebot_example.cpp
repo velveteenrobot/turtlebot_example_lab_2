@@ -97,6 +97,10 @@ int main(int argc, char **argv)
   cout<<"Running RRT"<<endl;
   vector<Pose> waypoints;
   Pose dest;
+  dest.position.x = 2.5;
+  dest.position.y = 2.5;
+  waypoints.push_back(dest);
+
   dest.position.x = -1.5;
   dest.position.y = 0.2;
   waypoints.push_back(dest);
@@ -104,11 +108,6 @@ int main(int argc, char **argv)
   dest.position.x = -0.2;
   dest.position.y = 4.0;
   waypoints.push_back(dest);
-
-  dest.position.x = 2.5;
-  dest.position.y = 2.5;
-  waypoints.push_back(dest);
-
 
   list<Milestone*> path = doRRTWaypoints(pose, waypoints, *roomMap);
   /*

@@ -71,7 +71,7 @@ Milestone* Milestone::makeRandomMilestone(Map& map) {
     float speed = randFloat(-0.05, 0.3);
     // float speed = randFloat(0.1, 0.3);
     // float speed = randFloat(-0.2, 0.2);
-    float turnRateRange = 1.0;
+    float turnRateRange = 1 - fabs(speed*2);
     float turnRate = randFloat(-turnRateRange, turnRateRange);
     int numCycles = (rand() % 70) + 30;
 
