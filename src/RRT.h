@@ -4,6 +4,7 @@
 #include <geometry_msgs/Pose.h>
 
 #include <list>
+#include "marker.h"
 
 using namespace std;
 using namespace geometry_msgs;
@@ -24,7 +25,7 @@ class Milestone {
   int getNumCycles() { return mNumCycles; }
   Milestone* makeRandomMilestone(Map& map);
 
-  void draw(int color);
+  void draw(MarkerType color);
   float distTo(Pose position);
 
  private:

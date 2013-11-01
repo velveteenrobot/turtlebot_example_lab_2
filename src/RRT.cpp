@@ -6,9 +6,6 @@
 #include <tf/transform_datatypes.h>
 #include <set>
 
-#define RRT_COLOR 1
-#define SELECTED_PATH_COLOR 0
-
 /**
  * Propogates the dynamics for 1 step
  */
@@ -119,25 +116,32 @@ list<Milestone*> doRRT(Pose start, Pose end, Map& map) {
   // total exploitation of floats not being bery descrete :)
   vector<Milestone*> milestones;
   Milestone* finalMilestone = NULL;
-  milestones.push_back(new Milestone(NULL, start, 0, 0, 0));
-  for (;;) {
-    // select a milestone
-    vector<Milestone*>::iterator iter = selectRandomMilestone(milestones);
-    Milestone* source = *iter;
-    // select random motion inputs
-    Milestone* newMilestone = source->makeRandomMilestone(map);
-    if (newMilestone == NULL) {
-      // that milestone didn't have any valid expanding paths try again
-      continue;
+  while (finalMilestone == NULL) {
+    cout<<"trying again"<<endl;
+    for (int i = 0; i < milestones.size(); ++i) {
+      delete milestones[i];
     }
+    milestones.clear();
+    milestones.push_back(new Milestone(NULL, start, 0, 0, 0));
+    for (int i = 0; i < 1000; ++i) {
+      // select a milestone
+      vector<Milestone*>::iterator iter = selectRandomMilestone(milestones);
+      Milestone* source = *iter;
+      // select random motion inputs
+      Milestone* newMilestone = source->makeRandomMilestone(map);
+      if (newMilestone == NULL) {
+        // that milestone didn't have any valid expanding paths try again
+        continue;
+      }
 
-    if (newMilestone->distTo(end) < TARGET_ERROR) {
-      finalMilestone = newMilestone;
-      break;
+      if (newMilestone->distTo(end) < TARGET_ERROR) {
+        finalMilestone = newMilestone;
+        break;
+      }
+      // insert the new milestone
+      insertMilestoneSorted(newMilestone, milestones, end);
+      newMilestone->draw(RANDOM_TREE);
     }
-    // insert the new milestone
-    insertMilestoneSorted(newMilestone, milestones, end);
-    newMilestone->draw(RRT_COLOR);
   }
 
   list<Milestone*> result;
@@ -147,7 +151,7 @@ list<Milestone*> doRRT(Pose start, Pose end, Map& map) {
        cur = cur->getPrev()) {
     result.push_front(cur);
     dontDelete.insert(cur);
-    cur->draw(SELECTED_PATH_COLOR);
+    cur->draw(SELECTED_TREE);
   }
 
   //  free the unused milestones
@@ -177,7 +181,7 @@ float Milestone::distTo(Pose position) {
   return sqrt(xDist*xDist + yDist*yDist);
 }
 
-void Milestone::draw(int color) {
+void Milestone::draw(MarkerType color) {
   Pose nextPose = mPrevMilestone->getEndPose();
   bool failed = false;
   vector<Point> points;
