@@ -52,28 +52,32 @@ static float randFloat(float min, float max) {
  * @param milestones sorted vector of milestones
  * @return one of the milestones, based on it's position in the list
  */
-static Milestone* selectRandomMilestone(vector<Milestone*>& milestones) {
-  const float decay = 0.25;
-  for (int i = 0; i < milestones.size() - 1; ++i) {
+static vector<Milestone*>::iterator selectRandomMilestone(
+    vector<Milestone*>& milestones) {
+  const float decay = 0.5;
+  for (vector<Milestone*>::iterator i = milestones.begin();
+       i != milestones.end();
+       ++i) {
     if (randFloat(0, 1) < decay) {
-      return milestones[i];
+      return i;
     }
   }
   // base exit case
-  return milestones.back();
+  return --milestones.end();
 }
 
 static const int MAX_BRANCH_CREATION_ATTEMPS = 20;
 
-static Milestone* makeRandomMilestone(Milestone* source, Map& map) {
+Milestone* Milestone::makeRandomMilestone(Map& map) {
   for (int i = 0; i < MAX_BRANCH_CREATION_ATTEMPS; ++i) {
     // TODO: normal distribution?
     // float speed = randFloat(-0.05, 0.3);
-    float speed = randFloat(0.1, 0.3);
-    float turnRate = randFloat(-1, 1);
+    float speed = randFloat(0.0, 0.3);
+    float turnRateRange = 1.0 - speed * 3;
+    float turnRate = randFloat(-turnRateRange, turnRateRange);
     int numCycles = (rand() % 70) + 30;
 
-    Pose endPose = source->getEndPose();
+    Pose endPose = getEndPose();
     bool failed = false;
     for (int cycle = 0; cycle < numCycles; ++cycle) {
       endPose = propogateDynamics(endPose, speed, turnRate);
@@ -83,11 +87,10 @@ static Milestone* makeRandomMilestone(Milestone* source, Map& map) {
         break;
       }
     }
-    if (failed) {
-      // try another set of values
-      continue;
+    if (!failed) {
+      return new Milestone(this, endPose, speed, turnRate, numCycles);
     }
-    return new Milestone(source, endPose, speed, turnRate, numCycles);
+    // try another set of values
   }
   return NULL;
 }
@@ -119,11 +122,12 @@ list<Milestone*> doRRT(Pose start, Pose end, Map& map) {
   milestones.push_back(new Milestone(NULL, start, 0, 0, 0));
   for (;;) {
     // select a milestone
-    Milestone* source = selectRandomMilestone(milestones);
+    vector<Milestone*>::iterator iter = selectRandomMilestone(milestones);
+    Milestone* source = *iter;
     // select random motion inputs
-    Milestone* newMilestone = makeRandomMilestone(source, map);
+    Milestone* newMilestone = source->makeRandomMilestone(map);
     if (newMilestone == NULL) {
-      // that milestone didn't have any valid paths, try again
+      // that milestone didn't have any valid expanding paths try again
       continue;
     }
 

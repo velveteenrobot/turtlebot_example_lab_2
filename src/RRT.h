@@ -22,6 +22,7 @@ class Milestone {
   float getSpeed() { return mSpeed; }
   float getTurnRate() { return mTurnRate; }
   int getNumCycles() { return mNumCycles; }
+  Milestone* makeRandomMilestone(Map& map);
 
   void draw(int color);
   float distTo(Pose position);

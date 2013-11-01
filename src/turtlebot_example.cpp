@@ -96,6 +96,9 @@ int main(int argc, char **argv)
   cout<<"Running RRT"<<endl;
   vector<Pose> waypoints;
   Pose dest;
+  dest.position.x = 0;
+  dest.position.y = 0;
+  waypoints.push_back(dest);
   dest.position.x = 6;
   dest.position.y = 3;
   waypoints.push_back(dest);
