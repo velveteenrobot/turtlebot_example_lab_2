@@ -1,6 +1,7 @@
 #include "tracking.h"
 #include <cmath>
 #include <tf/transform_datatypes.h>
+#include "marker.h"
 
 #define PI 3.14159265
 
@@ -11,6 +12,19 @@ bool Tracking::doCycle(Pose& curPose) {
   mExpectedPose = propogateDynamics(mExpectedPose, speed, turnRate);
 
   Twist vel;
+  
+  vector<Point> points;
+
+  // plot /indoor_pos 
+  points.push_back(curPose.position);
+  Pose closePose = curPose;
+
+  closePose.position.x = curPose.position.x + 0.01;
+  closePose.position.y = curPose.position.y + 0.01;
+  points.push_back(closePose.position);
+  
+  drawLine(CARROT, points);
+
   // feed forward control
   // vel.linear.x = speed;
   // vel.angular.z = turnRate;
